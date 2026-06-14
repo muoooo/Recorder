@@ -1,29 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>RoomLink</title>
   <script src="/socket.io/socket.io.js"></script>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     :root {
       --bg: #09090b;
-      --surface: #111113;
+      --surface: #111114;
       --surface2: #1c1c1f;
       --surface3: #27272b;
-      --border: rgba(255,255,255,0.07);
-      --border-md: rgba(255,255,255,0.12);
-      --border-hi: rgba(255,255,255,0.2);
-      --text: #ececf0;
+      --border: rgba(255, 255, 255, 0.07);
+      --border-md: rgba(255, 255, 255, 0.12);
+      --border-hi: rgba(255, 255, 255, 0.2);
+      --text: #ececf1;
       --muted: #71717a;
       --accent: #818cf8;
-      --accent-glow: rgba(129,140,248,0.18);
-      --accent-border: rgba(129,140,248,0.35);
+      --accent-glow: rgba(129, 140, 248, 0.18);
+      --accent-border: rgba(129, 140, 248, 0.35);
       --green: #4ade80;
-      --green-dim: rgba(74,222,128,0.1);
-      --green-border: rgba(74,222,128,0.25);
+      --green-dim: rgba(74, 222, 128, 0.1);
+      --green-border: rgba(74, 222, 128, 0.25);
       --red: #f87171;
       --r: 8px;
       --r-sm: 5px;
@@ -49,21 +56,45 @@
       gap: 9px;
       margin-bottom: 0.35rem;
     }
+
     .logo-icon {
-      width: 34px; height: 34px;
+      width: 34px;
+      height: 34px;
       background: var(--accent-glow);
       border: 1px solid var(--accent-border);
       border-radius: 9px;
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    .logo-icon svg { width: 18px; height: 18px; stroke: var(--accent); }
-    .logo-text { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
-    .logo-text span { color: var(--accent); }
-    .tagline { font-size: 13px; color: var(--muted); margin-bottom: 2rem; text-align: center; }
+
+    .logo-icon svg {
+      width: 18px;
+      height: 18px;
+      stroke: var(--accent);
+    }
+
+    .logo-text {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.4px;
+    }
+
+    .logo-text span {
+      color: var(--accent);
+    }
+
+    .tagline {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 2rem;
+      text-align: center;
+    }
 
     /* ── Card ── */
     .card {
-      width: 100%; max-width: 420px;
+      width: 100%;
+      max-width: 420px;
       background: var(--surface);
       border: 1px solid var(--border-md);
       border-radius: 14px;
@@ -71,11 +102,23 @@
     }
 
     /* ── Inputs ── */
-    .field { margin-bottom: 1rem; }
-    label { display: block; font-size: 12px; font-weight: 500; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.04em; text-transform: uppercase; }
+    .field {
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 6px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
 
     input {
-      width: 100%; height: 42px;
+      width: 100%;
+      height: 42px;
       background: var(--surface2);
       border: 1px solid var(--border-md);
       border-radius: var(--r-sm);
@@ -85,11 +128,27 @@
       outline: none;
       transition: border-color 0.15s;
     }
-    input:focus { border-color: var(--accent-border); background: var(--surface3); }
-    input::placeholder { color: var(--muted); font-size: 14px; }
-    input.error { border-color: rgba(248,113,113,0.5); }
 
-    .err-msg { font-size: 12px; color: var(--red); margin-top: 5px; min-height: 16px; }
+    input:focus {
+      border-color: var(--accent-border);
+      background: var(--surface3);
+    }
+
+    input::placeholder {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    input.error {
+      border-color: rgba(248, 113, 113, 0.5);
+    }
+
+    .err-msg {
+      font-size: 12px;
+      color: var(--red);
+      margin-top: 5px;
+      min-height: 16px;
+    }
 
     /* ── Buttons ── */
     .btn {
@@ -103,57 +162,146 @@
       background: var(--surface2);
       color: var(--text);
       transition: background 0.15s, border-color 0.15s, transform 0.1s;
-      display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
       white-space: nowrap;
     }
-    .btn:hover { background: var(--surface3); border-color: var(--border-hi); }
-    .btn:active { transform: scale(0.97); }
-    .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-    .btn-full { width: 100%; }
-    .btn-accent { background: var(--accent); border-color: transparent; color: #0f0f1a; font-weight: 600; }
-    .btn-accent:hover { background: #6d77f0; border-color: transparent; }
+
+    .btn:hover {
+      background: var(--surface3);
+      border-color: var(--border-hi);
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-full {
+      width: 100%;
+    }
+
+    .btn-accent {
+      background: var(--accent);
+      border-color: transparent;
+      color: #0f0f1a;
+      font-weight: 600;
+    }
+
+    .btn-accent:hover {
+      background: #6d77f0;
+      border-color: transparent;
+    }
 
     .divider {
-      display: flex; align-items: center; gap: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
       margin: 1.25rem 0;
-      font-size: 12px; color: var(--muted);
+      font-size: 12px;
+      color: var(--muted);
     }
-    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
-    .join-row { display: flex; gap: 8px; }
-    .join-row input { flex: 1; font-family: var(--mono); letter-spacing: 0.08em; text-transform: uppercase; }
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .join-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .join-row input {
+      flex: 1;
+      font-family: var(--mono);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
 
     /* ── Room view ── */
-    #room-view { display: none; width: 100%; max-width: 420px; }
+    #room-view {
+      display: none;
+      width: 100%;
+      max-width: 420px;
+    }
 
     .room-header {
-      display: flex; align-items: center; justify-content: space-between;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       margin-bottom: 1.25rem;
     }
+
     .room-badge {
-      display: flex; align-items: center; gap: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
+
     .room-badge .dot {
-      width: 8px; height: 8px; border-radius: 50%;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
       background: var(--green);
-      box-shadow: 0 0 8px rgba(74,222,128,0.6);
+      box-shadow: 0 0 8px rgba(74, 222, 128, 0.6);
       animation: pulse 2s infinite;
     }
+
     @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.4;
+      }
     }
-    .room-code-label { font-size: 13px; color: var(--muted); }
-    .room-code { font-family: var(--mono); font-size: 13px; color: var(--accent); font-weight: 600; letter-spacing: 0.1em; }
+
+    .room-code-label {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .room-code {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--accent);
+      font-weight: 600;
+      letter-spacing: 0.1em;
+    }
 
     .copy-btn {
-      height: 32px; padding: 0 0.75rem;
-      background: var(--surface2); border: 1px solid var(--border-md);
-      border-radius: var(--r-sm); font-size: 12px; color: var(--muted);
-      cursor: pointer; transition: all 0.15s;
-      display: flex; align-items: center; gap: 5px;
+      height: 32px;
+      padding: 0 0.75rem;
+      background: var(--surface2);
+      border: 1px solid var(--border-md);
+      border-radius: var(--r-sm);
+      font-size: 12px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 5px;
     }
-    .copy-btn:hover { color: var(--text); border-color: var(--border-hi); }
+
+    .copy-btn:hover {
+      color: var(--text);
+      border-color: var(--border-hi);
+    }
 
     .room-card {
       background: var(--surface);
@@ -163,14 +311,24 @@
     }
 
     .members-label {
-      font-size: 11px; font-weight: 500; text-transform: uppercase;
-      letter-spacing: 0.08em; color: var(--muted); margin-bottom: 1rem;
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 1rem;
     }
 
-    .member-list { display: flex; flex-direction: column; gap: 8px; }
+    .member-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
 
     .member-item {
-      display: flex; align-items: center; gap: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
       padding: 0.65rem 0.85rem;
       background: var(--surface2);
       border: 1px solid var(--border);
@@ -178,31 +336,61 @@
       transition: border-color 0.3s;
       animation: slideIn 0.25s ease;
     }
+
     .member-item.you {
       background: var(--accent-glow);
       border-color: var(--accent-border);
     }
+
     @keyframes slideIn {
-      from { opacity: 0; transform: translateY(-6px); }
-      to   { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(-6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .avatar {
-      width: 32px; height: 32px; border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
       background: var(--surface3);
       border: 1px solid var(--border-md);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 13px; font-weight: 600; color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
       flex-shrink: 0;
     }
-    .member-item.you .avatar { background: var(--accent-glow); border-color: var(--accent-border); color: var(--accent); }
 
-    .member-name { font-size: 14px; font-weight: 500; flex: 1; }
+    .member-item.you .avatar {
+      background: var(--accent-glow);
+      border-color: var(--accent-border);
+      color: var(--accent);
+    }
+
+    .member-name {
+      font-size: 14px;
+      font-weight: 500;
+      flex: 1;
+    }
+
     .you-tag {
-      font-size: 10px; font-weight: 600; text-transform: uppercase;
-      letter-spacing: 0.08em; color: var(--accent);
-      background: var(--accent-glow); border: 1px solid var(--accent-border);
-      border-radius: 3px; padding: 2px 6px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      background: var(--accent-glow);
+      border: 1px solid var(--accent-border);
+      border-radius: 3px;
+      padding: 2px 6px;
     }
 
     .event-log {
@@ -217,247 +405,329 @@
       color: var(--muted);
       line-height: 1.7;
     }
-    .event-log .ev-join { color: var(--green); }
-    .event-log .ev-leave { color: var(--red); opacity: 0.8; }
-    .event-log .ev-sys { color: var(--muted); }
+
+    .event-log .ev-join {
+      color: var(--green);
+    }
+
+    .event-log .ev-leave {
+      color: var(--red);
+      opacity: 0.8;
+    }
+
+    .event-log .ev-sys {
+      color: var(--muted);
+    }
 
     .leave-btn {
-      margin-top: 1rem; width: 100%; height: 38px;
-      background: transparent; border: 1px solid rgba(248,113,113,0.25);
-      border-radius: var(--r-sm); color: var(--red); font-size: 13px;
-      cursor: pointer; transition: all 0.15s;
+      margin-top: 1rem;
+      width: 100%;
+      height: 38px;
+      background: transparent;
+      border: 1px solid rgba(248, 113, 113, 0.25);
+      border-radius: var(--r-sm);
+      color: var(--red);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s;
     }
-    .leave-btn:hover { background: rgba(248,113,113,0.07); border-color: rgba(248,113,113,0.45); }
+
+    .leave-btn:hover {
+      background: rgba(248, 113, 113, 0.07);
+      border-color: rgba(248, 113, 113, 0.45);
+    }
 
     .toast {
-      position: fixed; bottom: 1.5rem; left: 50%;
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
       transform: translateX(-50%) translateY(60px);
-      background: var(--surface3); border: 1px solid var(--border-hi);
-      border-radius: var(--r-sm); padding: 0.55rem 1rem;
-      font-size: 13px; color: var(--text);
+      background: var(--surface3);
+      border: 1px solid var(--border-hi);
+      border-radius: var(--r-sm);
+      padding: 0.55rem 1rem;
+      font-size: 13px;
+      color: var(--text);
       transition: transform 0.2s ease;
-      pointer-events: none; white-space: nowrap; z-index: 100;
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 100;
     }
-    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
 
     @media (max-width: 460px) {
-      .card, #room-view { max-width: 100%; }
-      .card { padding: 1.25rem; }
+
+      .card,
+      #room-view {
+        max-width: 100%;
+      }
+
+      .card {
+        padding: 1.25rem;
+      }
     }
   </style>
 </head>
+
 <body>
 
-<div class="logo">
-  <div class="logo-icon">
-    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-      <circle cx="9" cy="7" r="4"/>
-      <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-      <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-    </svg>
-  </div>
-  <div class="logo-text">Room<span>Link</span></div>
-</div>
-<p class="tagline">Create a room · Share the code · Everyone joins</p>
-
-<!-- LOBBY -->
-<div class="card" id="lobby">
-
-  <div class="field">
-    <label for="name-input">Your name</label>
-    <input type="text" id="name-input" placeholder="Enter your name…" maxlength="30" autocomplete="off" />
-    <div class="err-msg" id="name-err"></div>
-  </div>
-
-  <button class="btn btn-accent btn-full" id="create-btn">
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-    Create room
-  </button>
-
-  <div class="divider">or join existing</div>
-
-  <div class="field" style="margin-bottom:0.75rem">
-    <label for="room-input">Room code</label>
-    <div class="join-row">
-      <input type="text" id="room-input" placeholder="A3F9B2" maxlength="6" autocomplete="off" />
-      <button class="btn btn-accent" id="join-btn">Enter room</button>
+  <div class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+      </svg>
     </div>
-    <div class="err-msg" id="join-err"></div>
+    <div class="logo-text">Room<span>Link</span></div>
   </div>
+  <p class="tagline">Create a room · Share the code · Everyone joins</p>
 
-</div>
+  <!-- LOBBY -->
+  <div class="card" id="lobby">
 
-<!-- ROOM VIEW -->
-<div id="room-view">
-
-  <div class="room-header">
-    <div class="room-badge">
-      <span class="dot"></span>
-      <span class="room-code-label">Room</span>
-      <span class="room-code" id="room-code-display"></span>
+    <div class="field">
+      <label for="name-input">Your name</label>
+      <input type="text" id="name-input" placeholder="Enter your name…" maxlength="30" autocomplete="off" />
+      <div class="err-msg" id="name-err"></div>
     </div>
-    <button class="copy-btn" id="copy-btn">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-      Copy code
+
+    <button class="btn btn-accent btn-full" id="create-btn">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+        stroke-linecap="round">
+        <line x1="12" y1="5" x2="12" y2="19" />
+        <line x1="5" y1="12" x2="19" y2="12" />
+      </svg>
+      Create room
     </button>
+
+    <div class="divider">or join existing</div>
+
+    <div class="field" style="margin-bottom:0.75rem">
+      <label for="room-input">Room code</label>
+      <div class="join-row">
+        <input type="text" id="room-input" placeholder="A3F9B2" maxlength="6" autocomplete="off" />
+        <button class="btn btn-accent" id="join-btn">Enter room</button>
+      </div>
+      <div class="err-msg" id="join-err"></div>
+    </div>
+
   </div>
 
-  <div class="room-card">
-    <div class="members-label">In this room — <span id="member-count">0</span> people</div>
-    <div class="member-list" id="member-list"></div>
+  <!-- ROOM VIEW -->
+  <div id="room-view">
 
-    <div class="event-log" id="event-log"></div>
+    <div class="room-header">
+      <div class="room-badge">
+        <span class="dot"></span>
+        <span class="room-code-label">Room</span>
+        <span class="room-code" id="room-code-display"></span>
+      </div>
+      <button class="copy-btn" id="copy-btn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round">
+          <rect x="9" y="9" width="13" height="13" rx="2" />
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+        </svg>
+        Copy code
+      </button>
+    </div>
+
+    <div class="room-card">
+      <div class="members-label">In this room — <span id="member-count">0</span> people</div>
+      <div class="member-list" id="member-list"></div>
+
+      <div class="event-log" id="event-log"></div>
+    </div>
+
+    <button class="leave-btn" id="leave-btn">Leave room</button>
+
   </div>
 
-  <button class="leave-btn" id="leave-btn">Leave room</button>
+  <div class="toast" id="toast"></div>
 
-</div>
+  <script>
+    const socket = io();
 
-<div class="toast" id="toast"></div>
+    let myName = '';
+    let myRoomId = '';
 
-<script>
-  const socket = io();
+    // refs
+    const lobby = document.getElementById('lobby');
+    const roomView = document.getElementById('room-view');
+    const nameInput = document.getElementById('name-input');
+    const nameErr = document.getElementById('name-err');
+    const createBtn = document.getElementById('create-btn');
+    const roomInput = document.getElementById('room-input');
+    const joinErr = document.getElementById('join-err');
+    const joinBtn = document.getElementById('join-btn');
+    const roomCodeDisp = document.getElementById('room-code-display');
+    const copyBtn = document.getElementById('copy-btn');
+    const memberList = document.getElementById('member-list');
+    const memberCount = document.getElementById('member-count');
+    const eventLog = document.getElementById('event-log');
+    const leaveBtn = document.getElementById('leave-btn');
+    const toastEl = document.getElementById('toast');
 
-  let myName = '';
-  let myRoomId = '';
+    // ── helpers ──
+    function toast(msg) {
+      toastEl.textContent = msg;
+      toastEl.classList.add('show');
+      setTimeout(() => toastEl.classList.remove('show'), 2200);
+    }
 
-  // refs
-  const lobby         = document.getElementById('lobby');
-  const roomView      = document.getElementById('room-view');
-  const nameInput     = document.getElementById('name-input');
-  const nameErr       = document.getElementById('name-err');
-  const createBtn     = document.getElementById('create-btn');
-  const roomInput     = document.getElementById('room-input');
-  const joinErr       = document.getElementById('join-err');
-  const joinBtn       = document.getElementById('join-btn');
-  const roomCodeDisp  = document.getElementById('room-code-display');
-  const copyBtn       = document.getElementById('copy-btn');
-  const memberList    = document.getElementById('member-list');
-  const memberCount   = document.getElementById('member-count');
-  const eventLog      = document.getElementById('event-log');
-  const leaveBtn      = document.getElementById('leave-btn');
-  const toastEl       = document.getElementById('toast');
+    function initials(name) {
+      return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+    }
 
-  // ── helpers ──
-  function toast(msg) {
-    toastEl.textContent = msg;
-    toastEl.classList.add('show');
-    setTimeout(() => toastEl.classList.remove('show'), 2200);
-  }
+    function getName() {
+      const v = nameInput.value.trim();
+      if (!v) { nameErr.textContent = 'Please enter your name first.'; nameInput.classList.add('error'); return null; }
+      nameErr.textContent = '';
+      nameInput.classList.remove('error');
+      return v;
+    }
 
-  function initials(name) {
-    return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
-  }
+    function logEvent(text, type = 'ev-sys') {
+      const line = document.createElement('div');
+      line.className = type;
+      const t = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      line.textContent = `${t}  ${text}`;
+      eventLog.appendChild(line);
+      eventLog.scrollTop = eventLog.scrollHeight;
+    }
 
-  function getName() {
-    const v = nameInput.value.trim();
-    if (!v) { nameErr.textContent = 'Please enter your name first.'; nameInput.classList.add('error'); return null; }
-    nameErr.textContent = '';
-    nameInput.classList.remove('error');
-    return v;
-  }
-
-  function logEvent(text, type = 'ev-sys') {
-    const line = document.createElement('div');
-    line.className = type;
-    const t = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    line.textContent = `${t}  ${text}`;
-    eventLog.appendChild(line);
-    eventLog.scrollTop = eventLog.scrollHeight;
-  }
-
-  function renderMembers(users) {
-    memberCount.textContent = users.length;
-    memberList.innerHTML = '';
-    users.forEach(u => {
-      const isYou = u.name === myName;
-      const item = document.createElement('div');
-      item.className = 'member-item' + (isYou ? ' you' : '');
-      item.innerHTML = `
+    function renderMembers(users) {
+      memberCount.textContent = users.length;
+      memberList.innerHTML = '';
+      users.forEach(u => {
+        const isYou = u.name === myName;
+        const item = document.createElement('div');
+        item.className = 'member-item' + (isYou ? ' you' : '');
+        item.innerHTML = `
         <div class="avatar">${initials(u.name)}</div>
         <span class="member-name">${u.name}</span>
         ${isYou ? '<span class="you-tag">You</span>' : ''}
       `;
-      memberList.appendChild(item);
+        memberList.appendChild(item);
+      });
+    }
+
+    // ── session persistence ──
+    function saveSession() {
+      localStorage.setItem('rl_session', JSON.stringify({ name: myName, roomId: myRoomId }));
+    }
+
+    function clearSession() {
+      localStorage.removeItem('rl_session');
+    }
+
+    function openRoom(roomId, users, isRejoin = false) {
+      myRoomId = roomId;
+      lobby.style.display = 'none';
+      roomView.style.display = 'block';
+      roomCodeDisp.textContent = roomId;
+      eventLog.innerHTML = '';
+      logEvent(isRejoin ? `Welcome back! Rejoined room ${roomId}.` : `Room ${roomId} ready. Share the code!`, 'ev-sys');
+      renderMembers(users);
+      saveSession();
+    }
+
+    // ── create room ──
+    createBtn.addEventListener('click', () => {
+      const name = getName();
+      if (!name) return;
+      myName = name;
+      createBtn.disabled = true;
+      socket.emit('create-room', { name }, (res) => {
+        createBtn.disabled = false;
+        if (res.error) { nameErr.textContent = res.error; return; }
+        openRoom(res.roomId, res.users);
+        logEvent(`You created this room.`, 'ev-sys');
+        saveSession();
+      });
     });
-  }
 
-  function openRoom(roomId, users) {
-    myRoomId = roomId;
-    lobby.style.display = 'none';
-    roomView.style.display = 'block';
-    roomCodeDisp.textContent = roomId;
-    eventLog.innerHTML = '';
-    logEvent(`Room ${roomId} ready. Share the code!`, 'ev-sys');
-    renderMembers(users);
-  }
+    // ── join room ──
+    joinBtn.addEventListener('click', doJoin);
+    roomInput.addEventListener('keydown', e => { if (e.key === 'Enter') doJoin(); });
 
-  // ── create room ──
-  createBtn.addEventListener('click', () => {
-    const name = getName();
-    if (!name) return;
-    myName = name;
-    createBtn.disabled = true;
-    socket.emit('create-room', { name }, (res) => {
-      createBtn.disabled = false;
-      if (res.error) { nameErr.textContent = res.error; return; }
-      openRoom(res.roomId, res.users);
-      logEvent(`You created this room.`, 'ev-sys');
+    function doJoin() {
+      const name = getName();
+      if (!name) return;
+      const code = roomInput.value.trim().toUpperCase();
+      if (!code) { joinErr.textContent = 'Enter a room code.'; return; }
+      joinErr.textContent = '';
+      myName = name;
+      joinBtn.disabled = true;
+      socket.emit('join-room', { name, roomId: code }, (res) => {
+        joinBtn.disabled = false;
+        if (res.error) { joinErr.textContent = res.error; return; }
+        openRoom(res.roomId, res.users);
+        logEvent(`You joined.`, 'ev-sys');
+        saveSession();
+      });
+    }
+
+    // ── socket events ──
+    socket.on('user-joined', ({ name, users }) => {
+      renderMembers(users);
+      logEvent(`${name} joined the room.`, 'ev-join');
     });
-  });
 
-  // ── join room ──
-  joinBtn.addEventListener('click', doJoin);
-  roomInput.addEventListener('keydown', e => { if (e.key === 'Enter') doJoin(); });
-
-  function doJoin() {
-    const name = getName();
-    if (!name) return;
-    const code = roomInput.value.trim().toUpperCase();
-    if (!code) { joinErr.textContent = 'Enter a room code.'; return; }
-    joinErr.textContent = '';
-    myName = name;
-    joinBtn.disabled = true;
-    socket.emit('join-room', { name, roomId: code }, (res) => {
-      joinBtn.disabled = false;
-      if (res.error) { joinErr.textContent = res.error; return; }
-      openRoom(res.roomId, res.users);
-      logEvent(`You joined.`, 'ev-sys');
+    socket.on('user-left', ({ name, users }) => {
+      renderMembers(users);
+      logEvent(`${name} left the room.`, 'ev-leave');
     });
-  }
 
-  // ── socket events ──
-  socket.on('user-joined', ({ name, users }) => {
-    renderMembers(users);
-    logEvent(`${name} joined the room.`, 'ev-join');
-  });
+    // ── copy code ──
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(myRoomId).then(() => toast('Room code copied!'));
+    });
 
-  socket.on('user-left', ({ name, users }) => {
-    renderMembers(users);
-    logEvent(`${name} left the room.`, 'ev-leave');
-  });
+    // ── leave ──
+    leaveBtn.addEventListener('click', () => {
+      clearSession();
+      socket.disconnect();
+      socket.connect();
+      myName = '';
+      myRoomId = '';
+      roomView.style.display = 'none';
+      lobby.style.display = 'block';
+      nameInput.value = '';
+      roomInput.value = '';
+    });
 
-  // ── copy code ──
-  copyBtn.addEventListener('click', () => {
-    navigator.clipboard.writeText(myRoomId).then(() => toast('Room code copied!'));
-  });
+    // ── auto-fill from URL ──
+    const urlCode = new URLSearchParams(location.search).get('room');
+    if (urlCode) roomInput.value = urlCode.toUpperCase();
 
-  // ── leave ──
-  leaveBtn.addEventListener('click', () => {
-    socket.disconnect();
-    socket.connect();
-    myName = '';
-    myRoomId = '';
-    roomView.style.display = 'none';
-    lobby.style.display = 'block';
-    nameInput.value = '';
-    roomInput.value = '';
-  });
-
-  // ── auto-fill from URL ──
-  const urlCode = new URLSearchParams(location.search).get('room');
-  if (urlCode) roomInput.value = urlCode.toUpperCase();
-</script>
+    // ── auto-rejoin on page load ──
+    const saved = localStorage.getItem('rl_session');
+    if (saved) {
+      try {
+        const { name, roomId } = JSON.parse(saved);
+        if (name && roomId) {
+          myName = name;
+          socket.emit('rejoin-room', { name, roomId }, (res) => {
+            if (res.error) {
+              // Room is gone (server restarted or room expired) — clear and show lobby
+              clearSession();
+              logEvent && logEvent(res.error, 'ev-sys');
+              toast('Your previous room is no longer available.');
+            } else {
+              openRoom(res.roomId, res.users, true);
+            }
+          });
+        }
+      } catch { }
+    }
+  </script>
 </body>
+<!-- okay im changing stuf why its not showing in pushpulls -->
+
 </html>

@@ -69,6 +69,24 @@ io.on('connection', (socket) => {
     console.log(`[room ${id}] "${name.trim()}" joined`);
   });
 
+  // Rejoin after page refresh (silent — no announcement to others)
+  socket.on('rejoin-room', ({ name, roomId }, callback) => {
+    if (!name || !roomId) return callback({ error: 'Missing data' });
+
+    const id = roomId.trim().toUpperCase();
+
+    if (!rooms[id]) return callback({ error: 'Room expired or not found.' });
+
+    rooms[id].users[socket.id] = { name: name.trim() };
+    socket.join(id);
+    socket.data.roomId = id;
+    socket.data.name = name.trim();
+
+    callback({ roomId: id, users: getRoomUsers(id) });
+
+    console.log(`[room ${id}] "${name.trim()}" rejoined`);
+  });
+
   // Disconnect: clean up
   socket.on('disconnect', () => {
     const { roomId, name } = socket.data;
