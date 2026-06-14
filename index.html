@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room Code System</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #f0f2f5;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 300px;
+        }
+
+        input,
+        button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            box-sizing: border-box;
+            font-size: 16px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+        }
+
+        li {
+            padding: 8px;
+            background: #eee;
+            margin-top: 5px;
+            border-radius: 4px;
+            font-size: 12px;
+            word-break: break-all;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- SCREEN 1: LOBBY ENTRY -->
+    <div id="lobbyScreen" class="card">
+        <h2>Game Lobby</h2>
+        <button id="createBtn">Create New Room</button>
+        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #ccc;">
+        <input type="text" id="codeInput" placeholder="Enter 5-Letter Code">
+        <button id="joinBtn" style="background: #28a745;">Join Room</button>
+    </div>
+
+    <!-- SCREEN 2: INSIDE ROOM -->
+    <div id="roomScreen" class="card hidden">
+        <h2>Room: <span id="roomCodeDisplay" style="color: #007bff;">XXXXX</span></h2>
+        <p>Share this code with friends!</p>
+        <h3>Users in Room:</h3>
+        <ul id="userList"></ul>
+        <button id="leaveBtn" style="background: #dc3545;">Leave Room</button>
+    </div>
+
+    <!-- Load Socket.io client script automatically served by the server -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        // DOM Elements
+        const lobbyScreen = document.getElementById('lobbyScreen');
+        const roomScreen = document.getElementById('roomScreen');
+        const createBtn = document.getElementById('createBtn');
+        const joinBtn = document.getElementById('joinBtn');
+        const leaveBtn = document.getElementById('leaveBtn');
+        const codeInput = document.getElementById('codeInput');
+        const roomCodeDisplay = document.getElementById('roomCodeDisplay');
+        const userList = document.getElementById('userList');
+
+        // --- BUTTON ACTIONS ---
+        createBtn.addEventListener('click', () => {
+            socket.emit('create_room');
+        });
+
+        joinBtn.addEventListener('click', () => {
+            const code = codeInput.value;
+            if (code) socket.emit('join_room', code);
+        });
+
+        leaveBtn.addEventListener('click', () => {
+            window.location.reload(); // Quickest way to trigger a disconnect and reset state
+        });
+
+        // --- NETWORK EVENT LISTENERS ---
+        socket.on('room_created', (code) => {
+            showRoom(code);
+        });
+
+        socket.on('join_success', (code) => {
+            showRoom(code);
+        });
+
+        socket.on('join_error', (errorMessage) => {
+            alert(errorMessage);
+        });
+
+        socket.on('update_users', (usersArray) => {
+            userList.innerHTML = '';
+            usersArray.forEach(userId => {
+                const li = document.createElement('li');
+                li.textContent = userId === socket.id ? `${userId} (You)` : userId;
+                userList.appendChild(li);
+            });
+        });
+
+        socket.on('room_closed', (message) => {
+            alert(message);
+            window.location.reload();
+        });
+
+        // UI View Toggle Utility
+        function showRoom(code) {
+            lobbyScreen.classList.add('hidden');
+            roomScreen.classList.remove('hidden');
+            roomCodeDisplay.textContent = code;
+        }
+    </script>
+</body>
+
+</html>
